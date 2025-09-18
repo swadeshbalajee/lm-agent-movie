@@ -1,6 +1,4 @@
 import streamlit as st
-import os
-import json
 from dotenv import load_dotenv
 
 from src.agent.builder import answer_user
@@ -33,8 +31,8 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.set_page_config(page_title="Movie Agent", page_icon="🎬", layout="centered")
-st.title("🎬 Movie Agent")
+st.set_page_config(page_title="Movie Agent", layout="centered")
+st.title("Movie Agent")
 
 
 env_ok, env_err = validate_env()
@@ -60,7 +58,7 @@ with st.expander("Quick Samples", expanded=True):
 
 query = st.text_input("Ask about a movie", key="query", placeholder="E.g., Tell me about the movie Vishwaroopam.", label_visibility="collapsed")
 
-run = st.button("Run", type="primary", use_container_width=True)
+run = st.button("Run", type="primary", width="stretch")
 
 if run:
     with st.spinner("Thinking..."):
@@ -93,7 +91,7 @@ if run:
             c1, c2 = st.columns([1, 2])
             if poster and poster.startswith("http"):
                 with c1:
-                    st.image(poster, caption="Poster", use_container_width=True)
+                    st.image(poster, caption="Poster", width="stretch")
             with c2:
                 st.markdown(bullets)
             st.markdown("</div>", unsafe_allow_html=True)

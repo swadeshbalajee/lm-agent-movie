@@ -36,18 +36,14 @@ def _direct_lookup(tool: MovieLookupTool, title: str, year: str | None) -> Dict[
     return data
 
 def answer_user(query: str) -> Dict[str, Any]:
-    """
-    Returns a dict tailored for the Streamlit UI:
-      - status: "ok" | "ambiguous" | "not_movie" | "need_title" | "not_found" | "error"
-      - bullets/poster/raw when status == ok
-    """
+
     extraction = extract_movie_request(query)
     print(f"Extraction result: {extraction}")
 
     if not extraction.is_movie_query:
         return {
             "status": "not_movie",
-            "message": "It looks like you’re not asking about a *movie*. Try: Tell me about \"Inception\" (2010)."
+            "message": "It looks like you’re not asking about a movie. Try: Tell me about \"Inception\" (2010)."
         }
     if not extraction.title:
         return {
@@ -55,7 +51,6 @@ def answer_user(query: str) -> Dict[str, Any]:
             "message": "Please provide the exact movie title (and year if known). Example: \"The Dark Knight\" (2008)."
         }
 
-    # Build agent input
     agent = build_agent()
     agent_input = (
         f"User asked: {query}\n"
@@ -73,24 +68,12 @@ def answer_user(query: str) -> Dict[str, Any]:
         text = (result.get("output") or "").strip()
         print(f"Agent output: {text}")
 
-        # if not text:
-        #     tool = MovieLookupTool()
-        #     data = _direct_lookup(tool, extraction.title, extraction.year)
-        #     status = data.get("status")
-        #     if status == "ok":
-        #         movie = data.get("movie", {})
-        #         return ok_payload(movie)
-        #     if status == "ambiguous":
-        #         return {"status": "ambiguous", "message": data.get("message", ""), "candidates": data.get("candidates", [])}
-        #     if status == "error":
-        #         return {"status": "error", "message": data.get("message", "Lookup failed.")}
-        #     return {"status": "not_found", "message": "No matching movie found."}
+        # TODO Direct lookup code needed here.
 
         data = json.loads(text)
         if data.get("status") == "ok":
             print("Direct lookup successful")
             movie = data["movie"]
-            # replace text with deterministic bullets from normalized movie
             attrs = MovieAttributes(**movie)
             bullets = attrs.to_bullets()
             return {
@@ -99,8 +82,7 @@ def answer_user(query: str) -> Dict[str, Any]:
                 "bullets": bullets,
                 "raw": movie,
             }
-
-        # If not ok, propagate the agent's intent via tool results
+        
         if data.get("status") == "ambiguous":
             return {"status": "ambiguous", "message": data.get("message", ""), "candidates": data.get("candidates", [])}
         if data.get("status") == "error":

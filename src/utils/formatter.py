@@ -9,10 +9,6 @@ def ok_payload(movie: Dict[str, Any]):
         "poster": movie.get("Poster", None)
     }
 
+# TODO: Check if the bullets formmat is right and if not format.
 def _bullets_from_movie(movie: Dict[str, Any]) -> str:
-    lines = []
-
-    order = [
-        ("Title", "Title"),
-        ("Year", "Year"),
-    ]
+    pass

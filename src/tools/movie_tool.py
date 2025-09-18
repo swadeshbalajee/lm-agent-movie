@@ -3,10 +3,12 @@ import os
 from typing import Dict, Any, Optional, List
 
 from langchain_core.tools import BaseTool
-from langchain_core.pydantic_v1 import BaseModel, Field, PrivateAttr
 
 from src.schemas import MovieProperties, LookupInput, MovieAttributes
 from src.tools.omdb_client import OMDBClient
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class MovieLookupTool(BaseTool):
     name: str = "movie_lookup"
@@ -18,9 +20,7 @@ class MovieLookupTool(BaseTool):
     args_schema: type = LookupInput
     return_direct: bool = True  
 
-    # omdb_client: OMDBClient = Field(default_factory=OMDBClient)
-    # _omdb_client: OMDBClient = OMDBClient(api_key=os.getenv("OMDB_API_KEY"))
-    _omdb_client: OMDBClient = OMDBClient(api_key="47124eb6")
+    _omdb_client: OMDBClient = OMDBClient(api_key=os.getenv("OMDB_API_KEY"))
 
     class Config:
         arbitrary_types_allowed = True
@@ -31,24 +31,26 @@ class MovieLookupTool(BaseTool):
     def _run(self, title:str, year:Optional[str]=None) -> str:
         try:
             print(f"Looking up movie: title={title}, year={year}")
-            detail = self._omdb_client.get_by_title(title, year)
-            print(f"OMDB detail: {detail}")
-            if str(detail.get("Response", "")).lower() == "true":
-                if detail.get("Type", "").lower() != "movie":
-                    print(f"Found title is not a movie: {detail.get('Type')}")
-                    return json.dumps({
-                        "status": "not_movie",
-                        "message": f'The title "{title}" found, but it is not a movie (type: {detail.get("Type", "?")}).'
-                    })
-                print(f"Movie found: {title} ({detail.get('Year', 'unknown year')})")
-                return json.dumps({
-                    "status": "ok",
-                    "message": f'Movie "{title}" details fetched successfully.',
-                    "movie": self._normalize(detail)
-                })
-
             search = self._omdb_client.search(title)
-            if str(search.get("Response", "")).lower() == "true" and search.get("Search", None):
+
+            if (year and title) or (len(search.get("Search", [])) == 1):
+                detail = self._omdb_client.get_by_title(title, year)
+                print(f"OMDB detail: {detail}")
+                if str(detail.get("Response", "")).lower() == "true":
+                    if detail.get("Type", "").lower() != "movie":
+                        print(f"Found title is not a movie: {detail.get('Type')}")
+                        return json.dumps({
+                            "status": "not_movie",
+                            "message": f'The title "{title}" found, but it is not a movie (type: {detail.get("Type", "?")}).'
+                        })
+                    print(f"Movie found: {title} ({detail.get('Year', 'unknown year')})")
+                    return json.dumps({
+                        "status": "ok",
+                        "message": f'Movie "{title}" details fetched successfully.',
+                        "movie": self._normalize(detail)
+                    })
+
+            if str(search.get("Response", "")).lower() == "true" and len(search.get("Search", [])) > 1:
                 print(f"Multiple candidates found for title: {title}")
                 candidates = [
                     {

@@ -43,7 +43,8 @@ class OMDBClient:
         params = {
             "t": title,
             "plot": "plot",
-            "type": "movie"
+            "type": "movie",
+            "page": 2
         }
         if year and re.fullmatch(r"\d{4}", year):
             params["y"] = year
@@ -56,5 +57,7 @@ class OMDBClient:
             "type": "movie"
         }
         data = self._request(params)
+        print("==Multiline search result==")
+        print(data)
         return data
         
