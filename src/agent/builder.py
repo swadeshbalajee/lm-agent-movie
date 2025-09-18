@@ -56,7 +56,7 @@ def answer_user(query: str) -> Dict[str, Any]:
         f"User asked: {query}\n"
         f"Extracted title: {extraction.title}\n"
         f"Extracted year: {extraction.year or 'unknown'}\n"
-        "If needed, call omdb_lookup with these."
+        "If needed, call movie_lookup with these."
     )
 
     try:
