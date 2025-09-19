@@ -22,9 +22,7 @@ class MovieLookupTool(BaseTool):
 
     _omdb_client: OMDBClient = OMDBClient(api_key=os.getenv("OMDB_API_KEY"))
 
-    class Config:
-        arbitrary_types_allowed = True
-    
+
     def _normalize(self, data:Dict[str, Any]) -> Dict[str, Any]:
         return MovieAttributes.from_omdb_data(data).dict()
     
